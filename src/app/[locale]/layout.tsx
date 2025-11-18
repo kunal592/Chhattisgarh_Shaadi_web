@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import { NextIntlClientProvider, useMessages } from "next-intl";
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -16,24 +17,20 @@ export default function LocaleLayout({ children, params: { locale } }: Props) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body >
-        <GoogleOAuthProvider clientId={clientId}>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <SocketManager />
-              <Navbar />
-              {children}
-              <Toaster />
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </GoogleOAuthProvider>
-      </body>
-    </html>
+    <GoogleOAuthProvider clientId={clientId}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SocketManager />
+          <Navbar />
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </NextIntlClientProvider>
+    </GoogleOAuthProvider>
   );
 }
