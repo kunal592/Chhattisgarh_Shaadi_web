@@ -1,0 +1,34 @@
+{
+  "HomePage": {
+    "title": "छत्तीसगढ़ शादी",
+    "subtitle": "छत्तीसगढ़िया मन के अपन बिहाव मंच",
+    "findPartner": "अपन जोड़ीदार अब खोजव",
+    "verifiedProfiles": "जांचे गए प्रोफाइल",
+    "languageSupport": "भाखा सहायता",
+    "cgSpecificFilters": "छत्तीसगढ़ी फ़िल्टर",
+    "howItWorksTitle": "कइसे काम करथे",
+    "howItWorksDescription": "अपन जीवनसाथी खोजना कुछ कदम दूर हे।",
+    "register": "पंजीयन करव",
+    "createProfile": "प्रोफाइल बनाव",
+    "findMatches": "जोड़ीदार खोजव",
+    "connect": "बातचीत करव",
+    "registerDescription": "कुछ मिनट म अपन खाता बनाव।",
+    "createProfileDescription": "अपन बारे म विस्तार से प्रोफाइल बनाव।",
+    "findMatchesDescription": "हमर स्मार्ट फ़िल्टर से अपन जोड़ीदार खोजव।",
+    "connectDescription": "पसंद के प्रोफाइल मन से बातचीत शुरू करव।",
+    "successStoriesTitle": "सफलता के कहानी",
+    "successStoriesDescription": "हमर खुश उपयोगकर्ता मन के कहिनी पढ़व।"
+  },
+  "Navbar": {
+    "features": "विशेषता मन",
+    "howItWorks": "कइसे काम करथे",
+    "testimonials": "कहानी मन",
+    "login": "लॉगिन करव"
+  },
+  "Footer": {
+    "copyright": "© {year} छत्तीसगढ़ शादी। सब्बो अधिकार सुरक्षित हे।",
+    "privacyPolicy": "गोपनीयता नीति",
+    "termsOfService": "सेवा के शर्त",
+    "contact": "संपर्क करव"
+  }
+}

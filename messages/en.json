@@ -1,0 +1,34 @@
+{
+  "HomePage": {
+    "title": "Chhattisgarh Shaadi",
+    "subtitle": "The matrimonial platform for Chhattisgarhis",
+    "findPartner": "Find Your Partner Now",
+    "verifiedProfiles": "Verified Profiles",
+    "languageSupport": "Language Support",
+    "cgSpecificFilters": "CG-Specific Filters",
+    "howItWorksTitle": "How It Works",
+    "howItWorksDescription": "Finding your soulmate is just a few steps away.",
+    "register": "Register",
+    "createProfile": "Create Profile",
+    "findMatches": "Find Matches",
+    "connect": "Connect",
+    "registerDescription": "Create your account in minutes.",
+    "createProfileDescription": "Build a detailed profile to express yourself.",
+    "findMatchesDescription": "Use our smart filters to find your partner.",
+    "connectDescription": "Start conversations with interesting profiles.",
+    "successStoriesTitle": "Success Stories",
+    "successStoriesDescription": "Read what our happy users have to say about us."
+  },
+  "Navbar": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "testimonials": "Testimonials",
+    "login": "Login"
+  },
+  "Footer": {
+    "copyright": "© {year} Chhattisgarh Shaadi. All Rights Reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contact": "Contact"
+  }
+}
