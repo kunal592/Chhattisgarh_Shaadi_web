@@ -74,37 +74,50 @@ export function OnboardingForm() {
       return false;
     }
   };
+const onSubmit = async (values: z.infer<typeof profileSchema>) => {
+  setIsLoading(true);
 
-  const onSubmit = async (values: z.infer<typeof profileSchema>) => {
-    setIsLoading(true);
+  console.log("📤 SUBMIT CLICKED");
+  console.log("📌 Raw Form Values:", values);
 
-    const photoUploaded = await handlePhotoUpload();
-    if (!photoUploaded) {
-      setIsLoading(false);
-      return; // Stop submission if photo upload fails
-    }
+  const photoUploaded = await handlePhotoUpload();
+  console.log("📸 Photo Upload Result:", photoUploaded);
 
-    try {
-      await api.post('/profiles', values);
+  if (!photoUploaded) {
+    console.log("⛔ Photo upload failed. Stopping form submit.");
+    setIsLoading(false);
+    return;
+  }
 
-      toast({
-        title: 'Profile Created',
-        description: 'Your profile has been successfully created.',
-      });
+  try {
+    console.log("🚀 Sending POST /profiles with payload:", values);
 
-      router.push('/dashboard');
-      router.refresh(); // Refresh the page to reflect new user state
+    const response = await api.post('/profiles', values);
 
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'An error occurred',
-        description: error.response?.data?.message || 'Could not save your profile.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    console.log("✅ Backend Response:", response.data);
+
+    toast({
+      title: 'Profile Created',
+      description: 'Your profile has been successfully created.',
+    });
+
+    router.push('/dashboard');
+    router.refresh();
+
+  } catch (error: any) {
+    console.error("❌ Onboarding failed:", error);
+    console.error("❌ Backend Error:", error.response?.data);
+
+    toast({
+      variant: 'destructive',
+      title: 'An error occurred',
+      description: error.response?.data?.message || 'Could not save your profile.',
+    });
+
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <Card className="w-full max-w-2xl">

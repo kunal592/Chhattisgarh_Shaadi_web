@@ -1,13 +1,11 @@
-import {notFound} from 'next/navigation';
-import {getRequestConfig, unstable_getRequestLocale} from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { getRequestConfig } from 'next-intl/server';
 
-// Can be imported from a shared config
+// Your supported locales
 const locales = ['en', 'hi', 'cg'];
 
-export default getRequestConfig(async () => {
-  const locale = await unstable_getRequestLocale();
-
-  // Validate that the incoming `locale` parameter is valid
+export default getRequestConfig(async ({ locale }) => {
+  // Validate locale from route segment
   if (!locales.includes(locale)) notFound();
 
   return {
