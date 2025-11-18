@@ -47,6 +47,17 @@ export type ApiOccupation = {
   companyName?: string;
 }
 
+// Represents a partner preference from the API
+export type ApiPartnerPreference = {
+    ageFrom: number;
+    ageTo: number;
+    heightFrom: number;
+    heightTo: number;
+    religion?: string;
+    caste?: string;
+    description?: string;
+}
+
 // Represents a user profile as returned by the backend API.
 export type ApiProfile = {
   id: string;
@@ -57,11 +68,14 @@ export type ApiProfile = {
   age: number;
   gender: string;
   religion: string;
+  caste?: string;
   motherTongue: string;
   maritalStatus: string;
   city?: string;
   state?: string;
   country?: string;
+  nativeDistrict?: string;
+  nativeState?: string;
   height?: number;
   occupations: ApiOccupation[];
   education: ApiEducation[];
@@ -69,6 +83,7 @@ export type ApiProfile = {
   profileCompleteness: number;
   isVerified: boolean;
   aboutMe?: string;
+  partnerPreference?: ApiPartnerPreference;
 };
 
 // Represents a profile card as returned from the /matches or /search endpoints
@@ -82,6 +97,7 @@ export type MatchProfile = {
   city?: string;
   state?: string;
   height?: number;
+  aboutMe?: string;
   // Use the first education entry as the primary display
   education: ApiEducation[];
   // Use the first occupation entry as the primary display
@@ -89,4 +105,12 @@ export type MatchProfile = {
     designation?: string;
   }[];
   media: ApiMedia[];
+}
+
+// Represents an interest received from the API
+export type Interest = {
+    id: string;
+    senderProfile: MatchProfile;
+    status: 'PENDING' | 'ACCEPTED' | 'DECLINED';
+    createdAt: string;
 }

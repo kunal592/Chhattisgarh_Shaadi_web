@@ -7,7 +7,7 @@ import { MatchSuggestions } from "@/components/dashboard/match-suggestions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Edit, ShieldCheck, UserCheck, Users, Loader2 } from "lucide-react";
+import { Edit, ShieldCheck, UserCheck, Users, Heart, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth";
 import api from "@/lib/api";
@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const quickActions = [
     { label: "Edit Profile", icon: <Edit className="w-8 h-8"/>, href: "/profile/edit" },
     { label: "View Matches", icon: <Users className="w-8 h-8"/>, href: "/matches" },
-    { label: "Shortlisted", icon: <UserCheck className="w-8 h-8"/>, href: "/shortlist" },
+    { label: "Interests Received", icon: <Heart className="w-8 h-8"/>, href: "/interests" },
     { label: "Verify Profile", icon: <ShieldCheck className="w-8 h-8"/>, href: "/verify" },
 ];
 
@@ -78,9 +78,9 @@ export default function DashboardPage() {
                         <div>
                             <p className="font-bold">{user?.name}</p>
                             <p className="text-sm text-muted-foreground">{user?.email}</p>
-                            <Link href={`/profile/${user?.id}`}>
-                            <Button variant="link" className="p-0 h-auto text-primary">View My Profile</Button>
-                            </Link>
+                            {profile && <Link href={`/profile/${profile.userId}`}>
+                                <Button variant="link" className="p-0 h-auto text-primary">View My Profile</Button>
+                            </Link>}
                         </div>
                     </CardContent>
                 </Card>

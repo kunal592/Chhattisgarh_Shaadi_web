@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState } from "react";
@@ -12,13 +11,14 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import Image from "next/image";
 
 const profileSchema = z.object({
   // Profile Fields
@@ -84,6 +84,7 @@ const profileSchema = z.object({
 
 const steps = [
   { id: 'basic', title: 'Basic Information', fields: ['firstName', 'lastName', 'dateOfBirth', 'gender', 'maritalStatus'] },
+  { id: 'photo', title: 'Profile Photo', fields: [] },
   { id: 'physical', title: 'Physical Attributes', fields: ['height', 'weight', 'complexion', 'bodyType', 'physicalDisability'] },
   { id: 'religion', title: 'Religion & Community', fields: ['religion', 'caste', 'subCaste', 'motherTongue'] },
   { id: 'location', title: 'Native Location', fields: ['nativeState', 'nativeDistrict', 'nativeTehsil', 'nativeVillage', 'speaksChhattisgarhi']},
@@ -99,6 +100,8 @@ const steps = [
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -112,11 +115,32 @@ export default function OnboardingPage() {
 
   const { handleSubmit, trigger } = methods;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
   const handleNext = async () => {
     const fields = steps[currentStep].fields;
     const output = await trigger(fields as any, { shouldFocus: true });
 
     if (!output) return;
+
+    if (currentStep === 1 && !photoFile) {
+        toast({
+            variant: "destructive",
+            title: "Photo Required",
+            description: "Please upload a profile photo to continue.",
+        });
+        return;
+    }
 
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -133,36 +157,34 @@ export default function OnboardingPage() {
   
   const onSubmit = async (data: z.infer<typeof profileSchema>) => {
     setIsLoading(true);
+
+    if (!photoFile) {
+        toast({
+            variant: "destructive",
+            title: "Photo Required",
+            description: "Please upload a profile photo.",
+        });
+        setIsLoading(false);
+        return;
+    }
+
     try {
+        // 1. Upload Photo
+        const formData = new FormData();
+        formData.append('photo', photoFile);
+
+        const photoRes = await api.post('/uploads/profile-photo', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        // 2. Create Profile
         const payload = {
-            // Profile fields
             ...data,
             physicalStatus: data.physicalDisability ? 'HAS_DISABILITY' : 'NORMAL',
-            drinkingHabits: data.drinkingHabit, // Map to correct backend field
-            smokingHabits: data.smokingHabit, // Map to correct backend field
-            
-            // Nested PartnerPreference object
-            partnerPreference: {
-                ageFrom: data.partnerAgeFrom,
-                ageTo: data.partnerAgeTo,
-                heightFrom: data.partnerHeightFrom,
-                heightTo: data.partnerHeightTo,
-                religion: data.partnerReligion,
-                caste: data.partnerCaste,
-                maritalStatus: data.partnerMaritalStatus,
-                education: data.partnerEducation,
-                occupation: data.partnerOccupation,
-                diet: data.partnerDiet,
-                description: data.partnerDescription,
-            }
+            drinkingHabits: data.drinkingHabit,
+            smokingHabits: data.smokingHabit,
+            // The photo is linked on the backend, no need to send media IDs
         };
-
-        // Remove partner preference fields from the top-level payload
-        Object.keys(payload).forEach(key => {
-            if (key.startsWith('partner')) {
-                delete (payload as any)[key];
-            }
-        });
         
         await api.post('/profiles', payload);
         toast({
@@ -220,7 +242,33 @@ export default function OnboardingPage() {
                   )} />
                 </>
               )}
-              {currentStep === 1 && ( // Physical Attributes
+               {currentStep === 1 && ( // Photo Upload
+                <div className="flex flex-col items-center justify-center space-y-4">
+                    <div className="w-48 h-48 rounded-full border-2 border-dashed flex items-center justify-center bg-muted/30 relative">
+                        {photoPreview ? (
+                            <Image src={photoPreview} alt="Profile Preview" layout="fill" objectFit="cover" className="rounded-full" />
+                        ) : (
+                            <div className="text-center">
+                                <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground mt-2">Click to upload</p>
+                            </div>
+                        )}
+                    </div>
+                    <FormItem>
+                        <FormControl>
+                            <Input type="file" accept="image/png, image/jpeg, image/jpg" className="hidden" id="photo-upload" onChange={handleFileChange} />
+                        </FormControl>
+                        <Button asChild variant="outline">
+                            <label htmlFor="photo-upload">
+                                {photoFile ? 'Change Photo' : 'Select Photo'}
+                            </label>
+                        </Button>
+                        <FormMessage />
+                    </FormItem>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, JPEG up to 5MB.</p>
+                </div>
+              )}
+              {currentStep === 2 && ( // Physical Attributes
                  <>
                    <FormField control={methods.control} name="height" render={({ field }) => (
                     <FormItem><FormLabel>Height (in cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
@@ -239,7 +287,7 @@ export default function OnboardingPage() {
                   )} />
                 </>
               )}
-              {currentStep === 2 && ( // Religion & Community
+              {currentStep === 3 && ( // Religion & Community
                  <>
                   <FormField control={methods.control} name="religion" render={({ field }) => (
                     <FormItem><FormLabel>Religion</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select religion" /></SelectTrigger></FormControl><SelectContent>
@@ -259,7 +307,7 @@ export default function OnboardingPage() {
                   )} />
                  </>
               )}
-               {currentStep === 3 && ( // Location
+               {currentStep === 4 && ( // Location
                  <>
                   <FormField control={methods.control} name="nativeState" render={({ field }) => (
                     <FormItem><FormLabel>Native State</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem>
@@ -281,7 +329,7 @@ export default function OnboardingPage() {
                     )} />
                  </>
               )}
-              {currentStep === 4 && ( // Lifestyle
+              {currentStep === 5 && ( // Lifestyle
                  <>
                    <FormField control={methods.control} name="eatingHabits" render={({ field }) => (
                     <FormItem><FormLabel>Eating Habits (Optional)</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select eating habits" /></SelectTrigger></FormControl><SelectContent>
@@ -300,7 +348,7 @@ export default function OnboardingPage() {
                   )} />
                  </>
               )}
-              {currentStep === 5 && ( // Education
+              {currentStep === 6 && ( // Education
                 <>
                   <FormField control={methods.control} name="highestEducation" render={({ field }) => (
                     <FormItem><FormLabel>Highest Education</FormLabel><FormControl><Input {...field} placeholder="e.g., Bachelor's Degree" /></FormControl><FormMessage /></FormItem>
@@ -313,7 +361,7 @@ export default function OnboardingPage() {
                   )} />
                 </>
               )}
-              {currentStep === 6 && ( // Occupation
+              {currentStep === 7 && ( // Occupation
                 <>
                   <FormField control={methods.control} name="occupation" render={({ field }) => (
                     <FormItem><FormLabel>Occupation</FormLabel><FormControl><Input {...field} placeholder="e.g., Software Engineer" /></FormControl><FormMessage /></FormItem>
@@ -328,7 +376,7 @@ export default function OnboardingPage() {
                   )} />
                 </>
               )}
-               {currentStep === 7 && ( // Family
+               {currentStep === 8 && ( // Family
                  <>
                   <FormField control={methods.control} name="fatherName" render={({ field }) => (
                     <FormItem><FormLabel>Father&apos;s Name (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -350,7 +398,7 @@ export default function OnboardingPage() {
                   )} />
                  </>
               )}
-               {currentStep === 8 && ( // Horoscope
+               {currentStep === 9 && ( // Horoscope
                 <>
                   <FormField control={methods.control} name="manglik" render={({ field }) => (
                     <FormItem><FormLabel>Are you Manglik?</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select an option" /></SelectTrigger></FormControl><SelectContent>
@@ -371,14 +419,14 @@ export default function OnboardingPage() {
                   )} />
                 </>
               )}
-               {currentStep === 9 && ( // About
+               {currentStep === 10 && ( // About
                  <>
                    <FormField control={methods.control} name="aboutMe" render={({ field }) => (
                     <FormItem><FormLabel>About Yourself</FormLabel><FormControl><Textarea {...field} rows={8} placeholder="Tell us about your personality, hobbies, and interests..." /></FormControl><FormMessage /></FormItem>
                   )} />
                  </>
               )}
-              {currentStep === 10 && ( // Partner Preferences
+              {currentStep === 11 && ( // Partner Preferences
                  <>
                   <div className="grid grid-cols-2 gap-4">
                      <FormField control={methods.control} name="partnerAgeFrom" render={({ field }) => (

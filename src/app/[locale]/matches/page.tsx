@@ -8,14 +8,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { MatchProfile } from "@/lib/types";
 import api from "@/lib/api";
-import { Briefcase, GraduationCap, Loader2, MapPin, Send } from "lucide-react";
+import { Briefcase, Check, GraduationCap, Loader2, MapPin, Send } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 function MatchCard({ profile }: { profile: MatchProfile }) {
+    const { toast } = useToast();
+    const [isConnecting, setIsConnecting] = useState(false);
+    const [interestSent, setInterestSent] = useState(false);
+
     const profileImage = profile.media?.find(m => m.isProfilePicture)?.url || `https://picsum.photos/seed/${profile.id}/400/400`;
     const education = profile.education?.[0];
     const occupation = profile.occupations?.[0];
+
+    const handleConnect = async () => {
+        setIsConnecting(true);
+        try {
+            await api.post(`/matches/interest/${profile.id}`);
+            toast({
+                title: "Interest Sent!",
+                description: `Your interest has been sent to ${profile.firstName}.`,
+            });
+            setInterestSent(true);
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Uh oh! Something went wrong.",
+                description: error.response?.data?.message || "There was a problem sending your interest.",
+            });
+        } finally {
+            setIsConnecting(false);
+        }
+    };
 
     return (
         <Card className="overflow-hidden transition-all hover:shadow-lg hover:scale-[1.02]">
@@ -40,9 +65,15 @@ function MatchCard({ profile }: { profile: MatchProfile }) {
                 <Button variant="outline" asChild>
                     <Link href={`/profile/${profile.userId}`}>View Profile</Link>
                 </Button>
-                <Button>
-                    <Send className="w-4 h-4 mr-2"/>
-                    Connect
+                <Button onClick={handleConnect} disabled={isConnecting || interestSent}>
+                    {isConnecting ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
+                    ) : interestSent ? (
+                        <Check className="w-4 h-4 mr-2" />
+                    ) : (
+                        <Send className="w-4 h-4 mr-2"/>
+                    )}
+                    {interestSent ? 'Interest Sent' : 'Connect'}
                 </Button>
             </CardFooter>
         </Card>
@@ -75,10 +106,8 @@ export default function MatchesPage() {
     useEffect(() => {
         async function fetchMatches() {
             try {
-                // The API doc uses /matches, but search is more flexible for now.
-                // We'll search for the opposite gender as a placeholder logic.
-                const response = await api.get('/profiles/search?gender=FEMALE&limit=12');
-                setMatches(response.data.data.profiles);
+                const response = await api.get('/matches');
+                setMatches(response.data.data);
             } catch (error) {
                 console.error("Failed to fetch matches", error);
             } finally {
