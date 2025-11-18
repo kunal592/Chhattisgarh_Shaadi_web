@@ -25,7 +25,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const { refreshToken, setAccessToken, logout } = useAuthStore.getState();
+    const { refreshToken, setAuth, logout, user } = useAuthStore.getState();
 
     if (error.response?.status === 401 && !originalRequest._retry && refreshToken) {
       originalRequest._retry = true;
@@ -34,14 +34,15 @@ api.interceptors.response.use(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/auth/refresh`,
           { refreshToken }
         );
-        const { accessToken } = response.data.data;
-        setAccessToken(accessToken);
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+        if (user) {
+            setAuth({ accessToken, refreshToken: newRefreshToken, user });
+        }
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         logout();
         if (typeof window !== 'undefined') {
-            // Redirect to the login page of the current locale or default to 'en'
             const locale = window.location.pathname.split('/')[1] || 'en';
             window.location.href = `/${locale}/login`;
         }
