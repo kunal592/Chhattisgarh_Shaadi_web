@@ -4,7 +4,6 @@ import { NextIntlClientProvider, useMessages } from "next-intl";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
-import Navbar from "@/components/navbar";
 import SocketManager from "@/components/socket-manager";
 
 type Props = {
@@ -26,7 +25,6 @@ export default function LocaleLayout({ children, params: { locale } }: Props) {
           disableTransitionOnChange
         >
           <SocketManager />
-          <Navbar />
           {children}
           <Toaster />
         </ThemeProvider>

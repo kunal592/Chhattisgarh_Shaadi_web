@@ -1,4 +1,4 @@
-import { OnboardingForm } from "../../../components/onboarding-form";
+import { OnboardingForm } from "@/components/onboarding-form";
 import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {

@@ -1,13 +1,14 @@
 'use client';
 
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { useAuthStore } from '@/store/auth';
-import api from '@/lib/api';
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "./ui/form";
+import { useAuthStore } from '../store/auth';
+import api from '../lib/api';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
@@ -27,8 +28,9 @@ export function OnboardingForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user) return;
     try {
-      const response = await api.put(`/users/${user?.id}`, values);
+      const response = await api.put(`/users/${user.id}`, values);
       const updatedUser = response.data.data;
       const { accessToken, refreshToken } = useAuthStore.getState();
       if (accessToken && refreshToken) {
