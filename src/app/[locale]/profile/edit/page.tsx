@@ -21,6 +21,9 @@ import { ApiProfile } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FamilyDetailsForm } from "@/components/profile/family-details-form";
+import { ProfessionalDetailsForm } from "@/components/profile/professional-details-form";
+import { PartnerPreferencesForm } from "@/components/profile/partner-preferences-form";
 
 
 const profileEditSchema = z.object({
@@ -156,7 +159,7 @@ export default function EditProfilePage() {
                                         </div>
                                         <div className="flex-grow text-center sm:text-left">
                                             <h2 className="text-2xl font-bold">{profileName}</h2>
-                                            <p className="text-muted-foreground">Profile ID: {profile?.profileId}</p>
+                                            <p className="text-muted-foreground">Profile ID: {profile?.id}</p>
                                         </div>
                                     </div>
                                 )}
@@ -271,13 +274,13 @@ export default function EditProfilePage() {
                                         <PhotoUploader />
                                     </TabsContent>
                                     <TabsContent value="family" className="space-y-4">
-                                         <p className="text-sm text-muted-foreground text-center">Family details coming soon.</p>
+                                         {profile ? <FamilyDetailsForm profile={profile} /> : <p className="text-sm text-muted-foreground text-center">Please fill out your basic information first.</p>}
                                     </TabsContent>
                                      <TabsContent value="professional" className="space-y-4">
-                                         <p className="text-sm text-muted-foreground text-center">Professional details coming soon.</p>
+                                         {profile ? <ProfessionalDetailsForm profile={profile} /> : <p className="text-sm text-muted-foreground text-center">Please fill out your basic information first.</p>}
                                     </TabsContent>
                                     <TabsContent value="preferences" className="space-y-4">
-                                         <p className="text-sm text-muted-foreground text-center">Partner preferences coming soon.</p>
+                                         {profile ? <PartnerPreferencesForm profile={profile} /> : <p className="text-sm text-muted-foreground text-center">Please fill out your basic information first.</p>}
                                     </TabsContent>
                                 </CardContent>
                             </Card>

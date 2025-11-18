@@ -8,11 +8,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Heart } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 
-interface Match {
+interface Shortlist {
   id: string;
-  matchScore: number;
   profile: {
     id: string;
     firstName: string;
@@ -22,40 +21,41 @@ interface Match {
   };
 }
 
-export default function MatchesPage() {
-  const [matches, setMatches] = useState<Match[]>([]);
+export default function ShortlistsPage() {
+  const [shortlists, setShortlists] = useState<Shortlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSendingInterest, setIsSendingInterest] = useState<string | null>(null);
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchMatches() {
+    async function fetchShortlists() {
       try {
-        const response = await api.get("/matches");
-        setMatches(response.data.data.matches);
+        const response = await api.get("/shortlists");
+        setShortlists(response.data.data);
       } catch (error) {
-        console.error("Failed to fetch matches", error);
-        toast({ variant: "destructive", title: "Error", description: "Failed to load your matches." });
+        console.error("Failed to fetch shortlists", error);
+        toast({ variant: "destructive", title: "Error", description: "Failed to load your shortlists." });
       } finally {
         setIsLoading(false);
       }
     }
-    fetchMatches();
+    fetchShortlists();
   }, [toast]);
 
-  const sendInterest = async (receiverId: string) => {
-    setIsSendingInterest(receiverId);
+  const removeFromShortlist = async (userId: string) => {
+    setIsRemoving(userId);
     try {
-      await api.post("/matches/interest", { receiverId });
-      toast({ title: "Interest Sent", description: "Your interest has been sent successfully." });
+      await api.delete(`/shortlists/${userId}`);
+      setShortlists(shortlists.filter(s => s.profile.id !== userId));
+      toast({ title: "Removed from Shortlist", description: "The profile has been removed from your shortlist." });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Failed to Send Interest",
-        description: error.response?.data?.message || "Could not send interest.",
+        title: "Failed to Remove",
+        description: error.response?.data?.message || "Could not remove the profile from your shortlist.",
       });
     } finally {
-      setIsSendingInterest(null);
+      setIsRemoving(null);
     }
   };
 
@@ -64,7 +64,7 @@ export default function MatchesPage() {
       <div className="p-4 sm:p-6">
         <Card>
           <CardHeader>
-            <CardTitle>Your Matches</CardTitle>
+            <CardTitle>Your Shortlisted Profiles</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -73,31 +73,31 @@ export default function MatchesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {matches.map((match) => (
-                  <Card key={match.id} className="overflow-hidden">
+                {shortlists.map((shortlist) => (
+                  <Card key={shortlist.id} className="overflow-hidden">
                     <div className="relative aspect-[3/4]">
                       <Image
-                        src={match.profile.media[0]?.url || "/placeholder.png"}
-                        alt={match.profile.firstName}
+                        src={shortlist.profile.media[0]?.url || "/placeholder.png"}
+                        alt={shortlist.profile.firstName}
                         fill
                         objectFit="cover"
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold">{match.profile.firstName}, {match.profile.age}</h3>
-                      <p className="text-sm text-muted-foreground">{match.profile.city}</p>
-                      <p className="text-sm text-muted-foreground">Match Score: {match.matchScore}%</p>
+                      <h3 className="text-lg font-semibold">{shortlist.profile.firstName}, {shortlist.profile.age}</h3>
+                      <p className="text-sm text-muted-foreground">{shortlist.profile.city}</p>
                       <Button 
                         className="w-full mt-4" 
-                        onClick={() => sendInterest(match.profile.id)}
-                        disabled={isSendingInterest === match.profile.id}
+                        variant="outline" 
+                        onClick={() => removeFromShortlist(shortlist.profile.id)}
+                        disabled={isRemoving === shortlist.profile.id}
                       >
-                        {isSendingInterest === match.profile.id ? (
+                        {isRemoving === shortlist.profile.id ? (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
-                          <Heart className="mr-2 h-4 w-4" />
+                          <Trash2 className="mr-2 h-4 w-4" />
                         )}
-                        Send Interest
+                        Remove
                       </Button>
                     </div>
                   </Card>
