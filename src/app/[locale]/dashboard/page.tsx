@@ -57,7 +57,7 @@ export default function DashboardPage() {
   }, [authUser]);
 
   const user = authUser;
-  const displayName = user?.name.split(' ')[0] || 'User';
+  const displayName = (user?.name || '').split(' ')[0] || 'User';
   const profileImage = profile?.media.find(m => m.isProfilePicture)?.url || user?.profilePhoto;
 
   return (
@@ -73,7 +73,7 @@ export default function DashboardPage() {
                     <CardContent className="p-4 flex items-center gap-4">
                         <Avatar className="h-12 w-12 sm:h-16 sm:w-16 border-2 border-primary">
                             <AvatarImage src={profileImage} alt={user?.name || ''} data-ai-hint="person photo" />
-                            <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{(user?.name || 'U').charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
                             <p className="font-bold">{user?.name}</p>
