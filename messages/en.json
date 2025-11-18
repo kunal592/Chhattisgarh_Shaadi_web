@@ -30,5 +30,15 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contact": "Contact"
+  },
+  "onboarding": {
+    "title": "Welcome to Onboarding",
+    "subtitle": "Let's get your profile ready.",
+    "step": "Step {step}",
+    "of": "of",
+    "basicInfo": "Basic Info",
+    "location": "Location",
+    "almostDone": "Almost Done",
+    "finishSetup": "Finish Setup"
   }
 }
